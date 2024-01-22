@@ -2,6 +2,11 @@
 name = "single-header"
 version = "0.1.0"
 edition = "2021"
+license-file = "LICENSE"
+repository = "http://github.com/DaemonSnake/single-header"
+description = "a rust command line utility to generate portable C/C++ single header file"
+readme = "README.md"
+authors = ["DaemonSnake <bastienPenava@gmail.com>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
