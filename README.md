@@ -1,2 +1,77 @@
 # single-header
 a rust command line utility to generate portable C/C++ single header file
+
+
+### Overview
+
+This Rust program is designed to convert C/C++ files into portable single-header files.
+
+- It processes C/C++ files by running the C preprocessor on it
+- Call the C preprocessor with the `-fdirectives-only` option to limit system specific macros / includes
+- Undoes the `#include` expansion of all system headers
+- does so by relying on [gcc preprocessor output documentation](https://gcc.gnu.org/onlinedocs/cpp/Preprocessor-Output.html) as the expected proprocessor output
+- replaces them with `#include` directives that are as close to the original as possible.
+- Offers protection against multiple inclusions with either `#ifdef` or `#pragma once`.
+
+### Example
+
+for the following project
+```c++
+// test.hpp
+#pragma once
+#include "first.hpp"
+void test() {}
+
+// first.hpp
+#pragma once
+#include "second.hpp"
+#include <cstddef>
+void second_function() {}
+
+// second.hpp
+#pragma once
+#include <type_traits>
+void first_function() {}
+```
+
+```bash
+$> single-header test.hpp
+#ifndef TEST_HPP_SINGLE_HEADER
+# define TEST_HPP_SINGLE_HEADER
+#include <type_traits>
+void first_function() {}
+#include <cstddef>
+void second_function() {}
+void test() {}
+#endif // TEST_HPP_SINGLE_HEADER
+```
+
+### Installation
+
+Clone the repository and install using Cargo:
+
+```bash
+git clone git@github.com:DaemonSnake/single-header.git
+cd single-header
+cargo install --path .
+```
+
+### Usage
+
+Run the program with the following syntax:
+
+```bash
+single_header_converter [OPTIONS] --file <FILE>
+```
+
+### Options
+
+    --file <FILE>: Path to the C/C++ header file to be converted.
+    --lang <LANG>: Language specification for the C preprocessor (default: c++).
+    --protect <METHOD>: Method to protect against multiple inclusions (ifdef or pragma once, default: ifdef).
+    Additional parameters for the C preprocessor can be specified after these options.
+
+### Requirements
+- Rust
+- C Preprocessor `cpp`
+
