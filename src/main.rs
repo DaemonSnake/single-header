@@ -56,15 +56,18 @@ fn main() {
     let txt = std::str::from_utf8(output.stdout.as_slice()).expect("cpp output isn't utf-8");
     let lines = txt.lines();
 
-    let def_name = ops.file.to_uppercase().replace('/', "_");
+    let invalid_macro_char = |c: char| !char::is_alphanumeric(c) && c != '_';
+
+    let def_name = ops.file.to_uppercase().replace(invalid_macro_char, "_");
+    let def_name = format!("{def_name}_SINGLE_HEADER"); // prevent collisions with user-land include guards
     let is_pragma = matches!(ops.protection.as_str(), "once");
 
     {
         if is_pragma {
             println!("#pragma once");
         } else {
-            println!("#ifdef {def_name}");
-            println!("# def {def_name}");
+            println!("#ifndef {def_name}");
+            println!("# define {def_name}");
         }
     }
     process_lines(lines);
