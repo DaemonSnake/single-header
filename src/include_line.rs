@@ -64,23 +64,19 @@ lazy_static! {
 }
 
 pub fn try_parse(line: &str) -> Option<IncludeDirective> {
-    let captures = INCLUDE_OUTPUT_REGEX.captures(line);
-
-    if captures.is_none() {
+    let Some(captures) = INCLUDE_OUTPUT_REGEX.captures(line) else {
         return None;
-    }
-    let captures: regex::Captures<'_> = captures.unwrap();
-
-    let linenum = captures.get(1).unwrap().as_str().parse::<u32>().unwrap();
-    let filename = captures.get(2).unwrap().as_str();
-    let end: usize = captures.get(0).unwrap().end();
+    };
+    let (full, [linenum, filename]) = captures.extract();
+    let linenum = linenum.parse::<u32>().unwrap();
+    let end = full.len();
     let flags_substr = &line[end..];
 
     let mut state = IncludeState::new();
 
     FLAGS_REGEX.captures_iter(flags_substr).for_each(|c| {
-        let str = c.get(1).unwrap().as_str();
-        let flag_number = str.parse::<u32>().unwrap();
+        let (_, [flag_str]) = c.extract();
+        let flag_number = flag_str.parse::<u32>().unwrap();
 
         match flag_number {
             flag if flag == FlagStatus::Open as u32 => {
