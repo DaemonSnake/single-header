@@ -63,18 +63,31 @@ cargo install --path .
 
 ### Usage
 
-Run the program with the following syntax:
-
 ```bash
-single_header_converter [OPTIONS] --file <FILE>
+Usage: single-header [OPTIONS] <FILE> [CPP_OPTS]...
+
+Arguments:
+  <FILE>
+          path to c/c++ header file
+
+  [CPP_OPTS]...
+          additional parameters for `cpp`
+
+Options:
+  -x, --lang <LANG>
+          [default: c++]
+          [possible values: c, c++]
+
+      --protect <PROTECTION>
+          protect against multiple includes with `#ifdef` or `#pragma once`
+
+          [default: ifdef]
+          [possible values: ifdef, once]
+
+  -h, --help
+          Print help (see a summary with '-h')
+
 ```
-
-### Options
-
-    --file <FILE>: Path to the C/C++ header file to be converted.
-    --lang <LANG>: Language specification for the C preprocessor (default: c++).
-    --protect <METHOD>: Method to protect against multiple inclusions (ifdef or pragma once, default: ifdef).
-    Additional parameters for the C preprocessor can be specified after these options.
 
 ### Requirements
 - Rust
