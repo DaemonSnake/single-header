@@ -48,7 +48,12 @@ void test() {}
 
 ### Installation
 
-Clone the repository and install using Cargo:
+Using cargo via crates.io:
+```bash
+cargo install single-header
+```
+
+Manually:
 
 ```bash
 git clone git@github.com:DaemonSnake/single-header.git
