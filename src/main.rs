@@ -11,15 +11,14 @@ use std::process::Command;
 #[command(
     author = "DaemonSnake",
     about = "convert C/C++ file into portable single-header file",
-    long_about = r"
+    long_about = r#"
 Convert C/C++ file into portable single-header file
 
-Runs C/C++ (cpp) preprocessor on <FILE>.
-It then undoes the `#include` expension of all the system headers.
-It replaces them with an `#include` directive as close as possible to the original one.
-As it only has access to the fully-qualified path at that point, it replaces it with the base filename.
-Might not work for all cases.
-"
+Runs C/C++ <preprocessor> on <FILE>
+Preventing builtin macros and macro expansion (but #if/#ifdef will be executed).
+It then undoes the `#include` expension of all the system headers,
+replacing them with an `#include <...>` directive that will be portable.
+"#
 )]
 struct Ops {
     #[arg(help = "path to c/c++ header file")]
@@ -28,7 +27,7 @@ struct Ops {
     #[arg(
         default_value = Preprocessor::Cpp.as_str(),
         short = 'p',
-        long = "preprocessor program"
+        long = "preprocessor"
     )]
     #[clap(value_enum)]
     preprocessor: Preprocessor,
@@ -45,7 +44,7 @@ struct Ops {
     #[clap(value_enum)]
     protection: Protection,
 
-    #[arg(help = r"additional parameters for `cpp`")]
+    #[arg(help = r"additional parameters for the preprocessor")]
     cpp_opts: Option<Vec<String>>,
 }
 

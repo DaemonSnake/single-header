@@ -71,10 +71,10 @@ Arguments:
           path to c/c++ header file
 
   [CPP_OPTS]...
-          additional parameters for `cpp`
+          additional parameters for the preprocessor
 
 Options:
-  -p, --preprocessor program <PREPROCESSOR>
+  -p, --preprocessor <PREPROCESSOR>
           [default: cpp]
           [possible values: cpp, gcc, clang]
 
