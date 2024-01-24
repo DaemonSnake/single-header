@@ -107,6 +107,14 @@ fn ifndef_guard(action: impl FnOnce(), filename: String) {
 fn main() {
     let ops: Ops = Ops::parse();
 
+    if let Err(e) = which::which(ops.preprocessor.as_str()) {
+        panic!(
+            "Failed to find preprocessor `{}`: {}",
+            ops.preprocessor.as_str(),
+            e
+        );
+    };
+
     let base_preprocessor_args = {
         let preprocessor_only = match ops.preprocessor {
             Preprocessor::Gcc | Preprocessor::Clang => vec!["-E"],

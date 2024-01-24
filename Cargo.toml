@@ -15,6 +15,4 @@ clap = { version = "4.4.18", features = ["derive"] }
 lazy_static = "1.4.0"
 radix_trie = "0.2.1"
 regex = "1.10.2"
-
-[build-dependencies]
 which = "6.0.0"
