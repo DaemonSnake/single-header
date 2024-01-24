@@ -138,6 +138,14 @@ fn main() {
         .output()
         .expect("C preprocessor failed");
 
+    if !output.status.success() {
+        panic!(
+            "C preprocessor exited with non-zero status code:\n{}",
+            String::from_utf8(output.stderr)
+                .expect("C preprocessor exited with non-zero and stderr isn't utf-8"),
+        );
+    }
+
     let txt = std::str::from_utf8(output.stdout.as_slice()).expect("cpp output isn't utf-8");
     let lines = txt.lines();
 
