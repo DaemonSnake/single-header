@@ -13,6 +13,10 @@ This Rust program is designed to convert C/C++ files into portable single-header
 - replaces them with `#include` directives that are as close to the original as possible.
 - Offers protection against multiple inclusions with either `#ifdef` or `#pragma once`.
 
+Limitations:
+- all preprocessor conditions (`#if`/`#else`/`#endif`) that occurs outside system headers will be evaluated.
+  Only way to prevent this would be to implement a custom mock C-preprocessor.
+
 ### Example
 
 for the following project
@@ -33,7 +37,7 @@ void second_function() {}
 #include <type_traits>
 void first_function() {}
 ```
-
+will produce:
 ```bash
 $> single-header test.hpp
 #ifndef TEST_HPP_SINGLE_HEADER
@@ -84,7 +88,6 @@ Options:
 
       --protect <PROTECTION>
           protect against multiple includes with `#ifdef` or `#pragma once`
-
           [default: ifdef]
           [possible values: ifdef, once]
 

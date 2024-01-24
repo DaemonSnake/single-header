@@ -1,6 +1,8 @@
 use lazy_static::lazy_static;
 use regex::Regex;
 
+// Documentation: https://gcc.gnu.org/onlinedocs/cpp/Preprocessor-Output.html
+
 pub enum FlagStatus {
     NotSet,
     Open = 1,
