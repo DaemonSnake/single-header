@@ -74,6 +74,10 @@ Arguments:
           additional parameters for `cpp`
 
 Options:
+  -p, --preprocessor program <PREPROCESSOR>
+          [default: cpp]
+          [possible values: cpp, gcc, clang]
+
   -x, --lang <LANG>
           [default: c++]
           [possible values: c, c++]
@@ -86,7 +90,6 @@ Options:
 
   -h, --help
           Print help (see a summary with '-h')
-
 ```
 
 ### Requirements
