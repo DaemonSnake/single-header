@@ -2,11 +2,12 @@ use std::collections::VecDeque;
 
 use crate::include_line::{self, IncludeDirective};
 use crate::line_zero::{LineZeroState, Skip};
+use crate::system_paths::SearchPaths;
 
 use include_line::FlagStatus;
 
-pub fn process_lines<'a, I: Iterator<Item = &'a str>>(lines: I) {
-    let mut p = Processor::new();
+pub fn process_lines<'a, I: Iterator<Item = &'a str>>(lines: I, search_paths: SearchPaths) {
+    let mut p = Processor::new(search_paths);
     for line in lines {
         p.process_line(line)
     }
@@ -15,13 +16,15 @@ pub fn process_lines<'a, I: Iterator<Item = &'a str>>(lines: I) {
 struct ShowContent(bool);
 
 struct Processor {
+    search_paths: SearchPaths,
     include_queue: VecDeque<ShowContent>,
     line_zero: LineZeroState,
 }
 
 impl Processor {
-    fn new() -> Self {
+    fn new(search_paths: SearchPaths) -> Self {
         Processor {
+            search_paths,
             include_queue: VecDeque::new(),
             line_zero: LineZeroState::new(),
         }
@@ -64,7 +67,7 @@ impl Processor {
                     matches!(self.include_queue.back(), Some(ShowContent(false)));
 
                 if state.system_header && !state.extern_c && !is_hidding_included_lines {
-                    print_include(filename);
+                    self.print_include(&filename);
                 }
 
                 let include_state = ShowContent(!state.system_header);
@@ -78,15 +81,9 @@ impl Processor {
             _ => {}
         }
     }
-}
 
-fn print_include<S: AsRef<str>>(filename: S) {
-    let path = std::path::Path::new(filename.as_ref());
-
-    if !path.is_file() {
-        panic!("header path is not a file {}", filename.as_ref())
+    fn print_include(&self, filename: &str) {
+        let include_name = self.search_paths.cleanup_path(filename);
+        println!("#include <{include_name}>");
     }
-
-    let filename = path.file_name().unwrap().to_str().unwrap();
-    println!("#include<{filename}>");
 }

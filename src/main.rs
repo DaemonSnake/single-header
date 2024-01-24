@@ -1,6 +1,7 @@
 mod include_line;
 mod line_zero;
 mod process;
+mod system_paths;
 
 use clap::Parser;
 use process::process_lines;
@@ -127,6 +128,9 @@ fn main() {
 
     let extra_cpp_opts = ops.cpp_opts.clone().unwrap_or_else(|| Vec::new());
 
+    let search_paths =
+        system_paths::SearchPaths::new(ops.preprocessor.as_str(), &base_preprocessor_args);
+
     let output = Command::new(ops.preprocessor.as_str())
         .args(&base_preprocessor_args)
         .arg(&ops.file)
@@ -144,7 +148,7 @@ fn main() {
 
     protection(
         || {
-            process_lines(lines);
+            process_lines(lines, search_paths);
         },
         ops.file,
     );
