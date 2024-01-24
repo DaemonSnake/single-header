@@ -24,6 +24,14 @@ struct Ops {
     #[arg(help = "path to c/c++ header file")]
     file: String,
 
+    #[arg(
+        default_value = Preprocessor::Cpp.as_str(),
+        short = 'p',
+        long = "preprocessor program"
+    )]
+    #[clap(value_enum)]
+    preprocessor: Preprocessor,
+
     #[arg(default_value = Lang::Cpp.as_str(), short = 'x', long = "lang")]
     #[clap(value_enum)]
     lang: Lang,
@@ -38,6 +46,23 @@ struct Ops {
 
     #[arg(help = r"additional parameters for `cpp`")]
     cpp_opts: Option<Vec<String>>,
+}
+
+#[derive(clap::ValueEnum, Clone, Debug)]
+enum Preprocessor {
+    Cpp,
+    Gcc,
+    Clang,
+}
+
+impl Preprocessor {
+    fn as_str(&self) -> &'static str {
+        match self {
+            Preprocessor::Cpp => "cpp",
+            Preprocessor::Gcc => "gcc",
+            Preprocessor::Clang => "clang",
+        }
+    }
 }
 
 #[derive(clap::ValueEnum, Clone, Debug)]
@@ -82,14 +107,29 @@ fn ifndef_guard(action: impl FnOnce(), filename: String) {
 fn main() {
     let ops: Ops = Ops::parse();
 
-    let extra_cpp_opts = ops.cpp_opts.unwrap_or_else(|| Vec::new());
-    let default_cpp_opts = vec!["-fdirectives-only"];
+    let base_preprocessor_args = {
+        let preprocessor_only = match ops.preprocessor {
+            Preprocessor::Gcc | Preprocessor::Clang => vec!["-E"],
+            Preprocessor::Cpp => vec![],
+        };
 
-    let output = Command::new("cpp")
-        .arg("-x")
-        .arg(ops.lang.as_str())
+        let base_args = vec![
+            "-x",
+            ops.lang.as_str(),
+            "-fdirectives-only", // prevent macro expansion
+        ];
+
+        preprocessor_only
+            .into_iter()
+            .chain(base_args.into_iter())
+            .collect::<Vec<_>>()
+    };
+
+    let extra_cpp_opts = ops.cpp_opts.clone().unwrap_or_else(|| Vec::new());
+
+    let output = Command::new(ops.preprocessor.as_str())
+        .args(&base_preprocessor_args)
         .arg(&ops.file)
-        .args(default_cpp_opts)
         .args(extra_cpp_opts)
         .output()
         .expect("C preprocessor failed");
