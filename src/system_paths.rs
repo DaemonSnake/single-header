@@ -10,11 +10,16 @@ pub struct SearchPaths {
 }
 
 impl SearchPaths {
-    pub fn new<'a, 'b>(program: &'a str, base_args: &Vec<&'b str>) -> SearchPaths {
+    pub fn new<'a, 'b>(
+        program: &'a str,
+        base_args: &Vec<&'b str>,
+        extra_args: &Vec<String>,
+    ) -> SearchPaths {
         let output = Command::new(program)
             .args(base_args)
             .arg("/dev/null") // dummy file to make preprocessor immediately exit
             .arg("-v")
+            .args(extra_args)
             .output()
             .expect(
                 "C preprocessor failed to be called with -v, required to retrieve system paths",

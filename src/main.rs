@@ -75,10 +75,13 @@ fn main() {
             .collect::<Vec<_>>()
     };
 
-    let search_paths =
-        system_paths::SearchPaths::new(ops.preprocessor.as_str(), &base_preprocessor_args);
-
     let extra_cpp_opts = ops.cpp_opts;
+
+    let search_paths = system_paths::SearchPaths::new(
+        ops.preprocessor.as_str(),
+        &base_preprocessor_args,
+        &extra_cpp_opts,
+    );
 
     let output = Command::new(ops.preprocessor.as_str())
         .args(&base_preprocessor_args)
