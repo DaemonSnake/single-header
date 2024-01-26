@@ -1,13 +1,19 @@
 use std::collections::VecDeque;
+use std::path::PathBuf;
 
 use crate::include_line::{self, IncludeDirective};
+use crate::inline_paths::InlinePaths;
 use crate::line_zero::{LineZeroState, Skip};
 use crate::system_paths::SearchPaths;
 
 use include_line::FlagStatus;
 
-pub fn process_lines<'a, I: Iterator<Item = &'a str>>(lines: I, search_paths: SearchPaths) {
-    let mut p = Processor::new(search_paths);
+pub fn process_lines<'a, I: Iterator<Item = &'a str>>(
+    lines: I,
+    search_paths: SearchPaths,
+    inline_paths: InlinePaths,
+) {
+    let mut p = Processor::new(search_paths, inline_paths);
     for line in lines {
         p.process_line(line)
     }
@@ -17,14 +23,16 @@ struct ShowContent(bool);
 
 struct Processor {
     search_paths: SearchPaths,
+    inline_paths: InlinePaths,
     include_queue: VecDeque<ShowContent>,
     line_zero: LineZeroState,
 }
 
 impl Processor {
-    fn new(search_paths: SearchPaths) -> Self {
+    fn new(search_paths: SearchPaths, inline_paths: InlinePaths) -> Self {
         Processor {
             search_paths,
+            inline_paths,
             include_queue: VecDeque::new(),
             line_zero: LineZeroState::new(),
         }
@@ -59,6 +67,7 @@ impl Processor {
         let path = include_info
             .absolute_path
             .expect("include file in cpp output doesn't exists");
+        let system_header = state.system_header && !self.inline_paths.should_inline(&path);
         match state.status {
             FlagStatus::Open => {
                 // replace content of system header with its include directive
@@ -67,11 +76,11 @@ impl Processor {
                 let is_hidding_included_lines =
                     matches!(self.include_queue.back(), Some(ShowContent(false)));
 
-                if state.system_header && !is_hidding_included_lines {
+                if system_header && !is_hidding_included_lines {
                     self.print_include(&path);
                 }
 
-                let include_state = ShowContent(!state.system_header);
+                let include_state = ShowContent(!system_header);
                 self.include_queue.push_back(include_state);
             }
             FlagStatus::Close => {

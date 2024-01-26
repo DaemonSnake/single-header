@@ -1,11 +1,12 @@
 mod args;
 mod include_line;
+mod inline_paths;
 mod line_zero;
 mod process;
 mod system_paths;
 
 use args::{Lang, Preprocessor, Protection};
-use clap::Parser;
+use clap::{ArgAction, Parser};
 use process::process_lines;
 use std::process::Command;
 
@@ -30,6 +31,15 @@ struct Ops {
         value_enum
     )]
     preprocessor: Preprocessor,
+
+    #[arg(
+        short='i',
+        long="inline",
+        name="INLINE_PATH",
+        action = ArgAction::Append,
+        help="path / file that must allways be `#include` expanded (can provided multiple times)"
+    )]
+    inline_paths: Vec<String>,
 
     #[arg(default_value = Lang::Cpp.as_str(), short = 'x', long = "lang", value_enum)]
     lang: Lang,
@@ -87,6 +97,8 @@ fn main() {
         &extra_cpp_opts,
     );
 
+    let inline_paths = inline_paths::InlinePaths::new(ops.inline_paths);
+
     let output = Command::new(ops.preprocessor.as_str())
         .args(&base_preprocessor_args)
         .arg(&ops.file)
@@ -107,7 +119,7 @@ fn main() {
 
     ops.protection.protect(
         || {
-            process_lines(lines, search_paths);
+            process_lines(lines, search_paths, inline_paths);
         },
         ops.file,
     );
