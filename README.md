@@ -11,7 +11,7 @@ This Rust program is designed to convert C/C++ files into portable single-header
 - Undoes the `#include` expansion of all system headers
 - does so by relying on [gcc preprocessor output documentation](https://gcc.gnu.org/onlinedocs/cpp/Preprocessor-Output.html) as the expected proprocessor output
 - replaces them with `#include` directives that are as close to the original as possible.
-- Offers protection against multiple inclusions with either `#ifdef` or `#pragma once`.
+- Offers protection against multiple inclusions with either `#ifndef` or `#pragma once`.
 
 Limitations:
 - all preprocessor conditions (`#if`/`#else`/`#endif`) that occurs outside system headers will be evaluated.
@@ -90,9 +90,9 @@ Options:
           [possible values: c, c++]
 
       --protect <PROTECTION>
-          protect against multiple includes with `#ifdef` or `#pragma once`
-          [default: ifdef]
-          [possible values: ifdef, once]
+          protect against multiple includes with `#ifndef` or `#pragma once`
+          [default: ifndef]
+          [possible values: ifndef, once]
 
   -h, --help
           Print help (see a summary with '-h')

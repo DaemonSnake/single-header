@@ -46,8 +46,8 @@ struct Ops {
 
     #[arg(
         long = "protect",
-        default_value = "ifdef",
-        help = "protect against multiple includes with `#ifdef` or `#pragma once`",
+        default_value = "ifndef",
+        help = "protect against multiple includes with `#ifndef` or `#pragma once`",
         value_enum
     )]
     protection: Protection,

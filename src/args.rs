@@ -40,14 +40,14 @@ impl Lang {
 
 #[derive(clap::ValueEnum, Clone, Debug)]
 pub enum Protection {
-    Ifdef,
+    Ifndef,
     Once,
 }
 
 impl Protection {
     pub fn protect(&self, action: impl FnOnce(), filename: String) {
         match self {
-            Protection::Ifdef => ifndef_guard(action, filename),
+            Protection::Ifndef => ifndef_guard(action, filename),
             Protection::Once => pragme_once(action),
         }
     }
