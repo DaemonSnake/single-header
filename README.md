@@ -100,5 +100,5 @@ Options:
 
 ### Requirements
 - Rust
-- C Preprocessor `cpp`
-
+- at least one C Preprocessor `cpp`, `gcc` or `clang`
+  
