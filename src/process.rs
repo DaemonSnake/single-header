@@ -67,7 +67,7 @@ impl Processor {
                 let is_hidding_included_lines =
                     matches!(self.include_queue.back(), Some(ShowContent(false)));
 
-                if state.system_header && !state.extern_c && !is_hidding_included_lines {
+                if state.system_header && !is_hidding_included_lines {
                     self.print_include(&path);
                 }
 
