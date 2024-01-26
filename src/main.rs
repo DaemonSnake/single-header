@@ -46,7 +46,7 @@ struct Ops {
     protection: Protection,
 
     #[arg(help = r"additional parameters for the preprocessor")]
-    cpp_opts: Option<Vec<String>>,
+    cpp_opts: Vec<String>,
 }
 
 fn main() {
@@ -78,7 +78,7 @@ fn main() {
     let search_paths =
         system_paths::SearchPaths::new(ops.preprocessor.as_str(), &base_preprocessor_args);
 
-    let extra_cpp_opts = ops.cpp_opts.unwrap_or_else(|| Vec::new());
+    let extra_cpp_opts = ops.cpp_opts;
 
     let output = Command::new(ops.preprocessor.as_str())
         .args(&base_preprocessor_args)
