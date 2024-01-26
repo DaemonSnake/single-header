@@ -56,8 +56,9 @@ impl Processor {
 
     fn on_include_info(&mut self, include_info: IncludeDirective) {
         let state = include_info.state;
-        let filename = include_info.filename;
-
+        let path = include_info
+            .absolute_path
+            .expect("include file in cpp output doesn't exists");
         match state.status {
             FlagStatus::Open => {
                 // replace content of system header with its include directive
@@ -67,7 +68,7 @@ impl Processor {
                     matches!(self.include_queue.back(), Some(ShowContent(false)));
 
                 if state.system_header && !state.extern_c && !is_hidding_included_lines {
-                    self.print_include(&filename);
+                    self.print_include(&path);
                 }
 
                 let include_state = ShowContent(!state.system_header);
@@ -82,7 +83,7 @@ impl Processor {
         }
     }
 
-    fn print_include(&self, filename: &str) {
+    fn print_include(&self, filename: &PathBuf) {
         let include_name = self.search_paths.cleanup_path(filename);
         println!("#include <{include_name}>");
     }

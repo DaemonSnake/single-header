@@ -1,3 +1,5 @@
+use std::path::{Path, PathBuf};
+
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -42,6 +44,7 @@ impl IncludeState {
 pub struct IncludeDirective {
     pub linenum: u32,
     pub filename: String,
+    pub absolute_path: Option<PathBuf>,
     pub state: IncludeState,
 }
 
@@ -96,10 +99,13 @@ pub fn try_parse(line: &str) -> Option<IncludeDirective> {
             _ => {}
         }
     });
+    let absolute_path = Path::new(filename).canonicalize().ok();
     let filename = String::from(filename);
+
     return Some(IncludeDirective {
         linenum,
         filename,
+        absolute_path,
         state,
     });
 }

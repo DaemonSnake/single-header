@@ -58,13 +58,12 @@ impl SearchPaths {
         SearchPaths { search_paths }
     }
 
-    pub fn cleanup_path(&self, path: &str) -> String {
-        let absolute_path = Path::new(path)
-            .canonicalize()
-            .expect("failed to convert header to absulute path");
-
-        let Some(search_path_trie) = self.search_paths.get_ancestor(&absolute_path) else {
-            panic!("Path {} is not in search paths", path);
+    pub fn cleanup_path(&self, absolute_path: &PathBuf) -> String {
+        let Some(search_path_trie) = self.search_paths.get_ancestor(absolute_path) else {
+            panic!(
+                "Path {} is not in search paths",
+                absolute_path.to_str().unwrap()
+            );
         };
         absolute_path
             .strip_prefix(search_path_trie.key().unwrap())
