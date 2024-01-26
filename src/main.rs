@@ -23,9 +23,6 @@ replacing them with an `#include <...>` directive that will be portable.
 "#
 )]
 struct Ops {
-    #[arg(help = "path to c/c++ header file")]
-    file: String,
-
     #[arg(
         default_value = Preprocessor::Cpp.as_str(),
         short = 'p',
@@ -45,7 +42,14 @@ struct Ops {
     )]
     protection: Protection,
 
-    #[arg(help = r"additional parameters for the preprocessor")]
+    #[arg(help = "path to c/c++ header file")]
+    file: String,
+
+    #[arg(
+        help = r"additional parameters for the preprocessor",
+        last = true,
+        action = ArgAction::Append,
+    )]
     cpp_opts: Vec<String>,
 }
 
