@@ -68,7 +68,7 @@ cargo install --path .
 ### Usage
 
 ```bash
-Usage: single-header [OPTIONS] <FILE> [CPP_OPTS]...
+Usage: single-header [OPTIONS] <FILE> [-- <CPP_OPTS>...]
 
 Arguments:
   <FILE>
@@ -81,6 +81,9 @@ Options:
   -p, --preprocessor <PREPROCESSOR>
           [default: cpp]
           [possible values: cpp, gcc, clang]
+
+  -i, --inline <INLINE_PATH>
+          path / file that must allways be `#include` expanded (can provided multiple times)
 
   -x, --lang <LANG>
           [default: c++]
