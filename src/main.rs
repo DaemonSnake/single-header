@@ -75,7 +75,7 @@ fn main() {
     };
 
     let base_preprocessor_args = {
-        let preprocessor_only = ops.preprocessor.required_args();
+        let preprocessor_specific = ops.preprocessor.required_args();
 
         let base_args = vec![
             "-x",
@@ -83,7 +83,7 @@ fn main() {
             "-fdirectives-only", // prevent macro expansion
         ];
 
-        preprocessor_only
+        preprocessor_specific
             .into_iter()
             .chain(base_args.into_iter())
             .collect::<Vec<_>>()
