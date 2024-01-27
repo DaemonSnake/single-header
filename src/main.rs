@@ -116,10 +116,13 @@ fn main() {
 
     let txt = std::str::from_utf8(output.stdout.as_slice()).expect("cpp output isn't utf-8");
     let lines = txt.lines();
+    let output = process_lines(lines, search_paths, inline_paths);
 
     ops.protection.protect(
-        || {
-            process_lines(lines, search_paths, inline_paths);
+        move || {
+            for line in output {
+                println!("{line}");
+            }
         },
         ops.file,
     );

@@ -12,11 +12,15 @@ pub fn process_lines<'a, I: Iterator<Item = &'a str>>(
     lines: I,
     search_paths: SearchPaths,
     inline_paths: InlinePaths,
-) {
+) -> Vec<String> {
+    let mut output = vec![];
     let mut p = Processor::new(search_paths, inline_paths);
     for line in lines {
-        p.process_line(line)
+        if let Some(output_line) = p.process_line(line) {
+            output.push(output_line);
+        }
     }
+    return output;
 }
 
 struct ShowContent(bool);
@@ -38,31 +42,31 @@ impl Processor {
         }
     }
 
-    fn process_line<'a>(&mut self, line: &'a str) {
+    fn process_line<'a>(&mut self, line: &'a str) -> Option<String> {
         match include_line::try_parse(line) {
             None => {
                 // ignore builtin defines and includes
                 if self.line_zero.ignore_line() {
-                    return;
+                    return None;
                 }
                 if matches!(self.include_queue.back(), Some(ShowContent(false))) {
-                    return;
+                    return None;
                 }
-                println!("{line}");
+                Some(String::from(line))
             }
             Some(include_info) => {
                 if let Skip(true) = self.line_zero.feed(&include_info) {
-                    return;
+                    return None;
                 }
                 if include_info.state.ignorable() {
-                    return;
+                    return None;
                 }
                 self.on_include_info(include_info)
             }
         }
     }
 
-    fn on_include_info(&mut self, include_info: IncludeDirective) {
+    fn on_include_info(&mut self, include_info: IncludeDirective) -> Option<String> {
         let state = include_info.state;
         let path = include_info
             .absolute_path
@@ -76,12 +80,16 @@ impl Processor {
                 let is_hidding_included_lines =
                     matches!(self.include_queue.back(), Some(ShowContent(false)));
 
-                if system_header && !is_hidding_included_lines {
-                    self.print_include(&path);
-                }
+                let ret = if system_header && !is_hidding_included_lines {
+                    Some(self.include_string(&path))
+                } else {
+                    None
+                };
 
                 let include_state = ShowContent(!system_header);
                 self.include_queue.push_back(include_state);
+
+                return ret;
             }
             FlagStatus::Close => {
                 if !self.include_queue.is_empty() {
@@ -89,11 +97,12 @@ impl Processor {
                 }
             }
             _ => {}
-        }
+        };
+        None
     }
 
-    fn print_include(&self, filename: &PathBuf) {
+    fn include_string(&self, filename: &PathBuf) -> String {
         let include_name = self.search_paths.cleanup_path(filename);
-        println!("#include <{include_name}>");
+        format!("#include <{include_name}>")
     }
 }
