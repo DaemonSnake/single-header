@@ -4,6 +4,7 @@ mod inline_paths;
 mod line_zero;
 mod process;
 mod system_paths;
+mod utils;
 
 use args::{Lang, Preprocessor, Protection};
 use clap::{ArgAction, Parser};
