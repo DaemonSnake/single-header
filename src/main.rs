@@ -65,6 +65,16 @@ struct Ops {
     cpp_opts: Vec<String>,
 }
 
+fn base_args(required: Vec<&'static str>, lang: Lang) -> Vec<&'static str> {
+    let base_args = vec![
+        "-x",
+        lang.as_str(),
+        "-fdirectives-only", // prevent macro expansion
+    ];
+
+    required.into_iter().chain(base_args.into_iter()).collect()
+}
+
 fn main() -> Result<()> {
     let ops = Ops::try_parse()?;
 
@@ -76,21 +86,7 @@ fn main() -> Result<()> {
         );
     };
 
-    let base_preprocessor_args = {
-        let preprocessor_specific = ops.preprocessor.required_args();
-
-        let base_args = vec![
-            "-x",
-            ops.lang.as_str(),
-            "-fdirectives-only", // prevent macro expansion
-        ];
-
-        preprocessor_specific
-            .into_iter()
-            .chain(base_args.into_iter())
-            .collect::<Vec<_>>()
-    };
-
+    let base_preprocessor_args = base_args(ops.preprocessor.required_args(), ops.lang);
     let extra_cpp_opts = ops.cpp_opts;
 
     let search_paths = system_paths::SearchPaths::new(
