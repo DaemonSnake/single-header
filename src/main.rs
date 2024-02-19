@@ -11,6 +11,7 @@ use args::{Lang, Preprocessor, Protection};
 use clap::{ArgAction, Parser};
 use process::process_lines;
 use std::process::Command;
+use utils::LazyForEach;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -97,23 +98,14 @@ fn main() -> Result<()> {
 
     let inline_paths = inline_paths::InlinePaths::new(ops.inline_paths);
 
-    let output = Command::new(ops.preprocessor.as_str())
+    let mut command = Command::new(ops.preprocessor.as_str());
+
+    command
         .args(&base_preprocessor_args)
         .arg(&ops.file)
-        .args(extra_cpp_opts)
-        .output()
-        .expect("C preprocessor failed");
+        .args(extra_cpp_opts);
 
-    if !output.status.success() {
-        panic!(
-            "C preprocessor exited with non-zero status code:\n{}",
-            String::from_utf8(output.stderr)
-                .expect("C preprocessor exited with non-zero and stderr isn't utf-8"),
-        );
-    }
-
-    let txt = std::str::from_utf8(output.stdout.as_slice()).expect("cpp output isn't utf-8");
-    let lines = txt.lines();
+    let lines = utils::stdout_command("C preprocessor", command)?;
     let output = process_lines(lines, search_paths, inline_paths);
 
     ops.protection.protect(

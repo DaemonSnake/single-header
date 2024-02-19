@@ -8,7 +8,7 @@ use crate::system_paths::SearchPaths;
 
 use include_line::FlagStatus;
 
-pub fn process_lines<'a, I: Iterator<Item = &'a str>>(
+pub fn process_lines<I: IntoIterator<Item = String>>(
     lines: I,
     search_paths: SearchPaths,
     inline_paths: InlinePaths,
@@ -16,11 +16,11 @@ pub fn process_lines<'a, I: Iterator<Item = &'a str>>(
     let mut output = vec![];
     let mut p = Processor::new(search_paths, inline_paths);
     for line in lines {
-        if let Some(output_line) = p.process_line(line) {
+        if let Some(output_line) = p.process_line(line.as_str()) {
             output.push(output_line);
         }
     }
-    return output;
+    output
 }
 
 struct ShowContent(bool);
