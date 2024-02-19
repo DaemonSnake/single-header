@@ -1,6 +1,7 @@
+use crate::utils::stderr_command;
+use anyhow::Result;
 use radix_trie::{Trie, TrieCommon};
 use std::{
-    io::BufRead,
     path::{Path, PathBuf},
     process::Command,
 };
@@ -14,31 +15,21 @@ impl SearchPaths {
         program: &'a str,
         base_args: &Vec<&'b str>,
         extra_args: &Vec<String>,
-    ) -> SearchPaths {
-        let output = Command::new(program)
+    ) -> Result<SearchPaths> {
+        let mut command = Command::new(program);
+
+        command
             .args(base_args)
             .arg("/dev/null") // dummy file to make preprocessor immediately exit
             .arg("-v")
-            .args(extra_args)
-            .output()
-            .expect(
-                "C preprocessor failed to be called with -v, required to retrieve system paths",
-            );
+            .args(extra_args);
 
-        if !output.status.success() {
-            panic!(
-                "C preprocessor exited with non-zero status code:\n{}",
-                String::from_utf8(output.stderr)
-                    .expect("C preprocessor exited with non-zero and stderr isn't utf-8"),
-            );
-        }
-
-        let mut parsing_search_list = false;
-        let debug_lines = output.stderr.lines().map(|l| l.unwrap());
+        let stderr_lines = stderr_command("C preprocessor", command)?;
+        let mut parsing_search_list: bool = false;
 
         let mut search_paths: Trie<_, _> = Trie::new();
 
-        for line in debug_lines {
+        for line in stderr_lines {
             if line.starts_with("#include <...> search starts here:") {
                 parsing_search_list = true;
                 continue;
@@ -55,7 +46,7 @@ impl SearchPaths {
             }
         }
 
-        SearchPaths { search_paths }
+        Ok(SearchPaths { search_paths })
     }
 
     pub fn cleanup_path(&self, absolute_path: &PathBuf) -> String {

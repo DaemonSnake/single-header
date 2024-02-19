@@ -6,6 +6,7 @@ mod process;
 mod system_paths;
 mod utils;
 
+use anyhow::Result;
 use args::{Lang, Preprocessor, Protection};
 use clap::{ArgAction, Parser};
 use process::process_lines;
@@ -64,8 +65,8 @@ struct Ops {
     cpp_opts: Vec<String>,
 }
 
-fn main() {
-    let ops: Ops = Ops::parse();
+fn main() -> Result<()> {
+    let ops = Ops::try_parse()?;
 
     if let Err(e) = which::which(ops.preprocessor.as_str()) {
         panic!(
@@ -96,7 +97,7 @@ fn main() {
         ops.preprocessor.as_str(),
         &base_preprocessor_args,
         &extra_cpp_opts,
-    );
+    )?;
 
     let inline_paths = inline_paths::InlinePaths::new(ops.inline_paths);
 
@@ -127,4 +128,5 @@ fn main() {
         },
         ops.file,
     );
+    Ok(())
 }
