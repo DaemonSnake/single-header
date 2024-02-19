@@ -108,13 +108,8 @@ fn main() -> Result<()> {
     let lines = utils::stdout_command("C preprocessor", command)?;
     let output = process_lines(lines, search_paths, inline_paths);
 
-    ops.protection.protect(
-        move || {
-            for line in output {
-                println!("{line}");
-            }
-        },
-        ops.file,
-    );
+    let lazy_print_lines = output.lazy_for_each(|line| println!("{line}"));
+    ops.protection.protect(lazy_print_lines, ops.file);
+
     Ok(())
 }
