@@ -33,7 +33,8 @@ impl SearchPaths {
             if line.starts_with("#include <...> search starts here:") {
                 parsing_search_list = true;
                 continue;
-            } else if line.starts_with("End of search list.") {
+            }
+            if line.starts_with("End of search list.") {
                 break;
             }
 
