@@ -75,3 +75,7 @@ where
         move || self.into_iter().for_each(action)
     }
 }
+
+pub fn merge<T>(left: Vec<T>, right: Vec<T>) -> Vec<T> {
+    left.into_iter().chain(right.into_iter()).collect()
+}

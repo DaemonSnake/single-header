@@ -73,7 +73,7 @@ fn base_args(required: Vec<&'static str>, lang: Lang) -> Vec<&'static str> {
         "-fdirectives-only", // prevent macro expansion
     ];
 
-    required.into_iter().chain(base_args.into_iter()).collect()
+    utils::merge(required, base_args)
 }
 
 fn main() -> Result<()> {
