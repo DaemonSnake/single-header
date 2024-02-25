@@ -1,4 +1,5 @@
 mod args;
+mod cmake;
 mod include_line;
 mod inline_paths;
 mod line_zero;
@@ -34,6 +35,12 @@ struct Ops {
         value_enum
     )]
     preprocessor: Preprocessor,
+
+    #[arg(
+        long = "cmake",
+        help = "path to build folder to find the compile_commands.json file"
+    )]
+    cmake: Option<std::path::PathBuf>,
 
     #[arg(
         short='i',
@@ -88,7 +95,9 @@ fn main() -> Result<()> {
     };
 
     let base_preprocessor_args = base_args(ops.preprocessor.required_args(), ops.lang);
-    let extra_cpp_opts = ops.cpp_opts;
+
+    let cmake_opts = cmake::cmake_options(ops.cmake, &ops.file)?;
+    let extra_cpp_opts = utils::merge(cmake_opts, ops.cpp_opts);
 
     let search_paths = system_paths::SearchPaths::new(
         ops.preprocessor.as_str(),
