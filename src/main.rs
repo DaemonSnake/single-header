@@ -83,6 +83,7 @@ fn base_args(required: Vec<&'static str>, lang: Lang) -> Vec<&'static str> {
     utils::merge(required, base_args)
 }
 
+// #[unix_sigpipe = "sig_dfl"] // TODO: enable once it's stable: https://github.com/rust-lang/rust/issues/97889
 fn main() -> Result<()> {
     let ops = Ops::parse();
 
