@@ -38,7 +38,7 @@ struct Ops {
 
     #[arg(
         long = "cmake",
-        help = "path to build folder to find the compile_commands.json file"
+        help = "path to build folder to find the compile_commands.json file that contains how to compile <FILE>"
     )]
     cmake: Option<std::path::PathBuf>,
 

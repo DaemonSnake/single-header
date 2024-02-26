@@ -82,6 +82,9 @@ Options:
           [default: cpp]
           [possible values: cpp, gcc, clang]
 
+      --cmake <CMAKE>
+          path to build folder to find the compile_commands.json file that contains how to compile <FILE>
+
   -i, --inline <INLINE_PATH>
           path / file that must allways be `#include` expanded (can provided multiple times)
 
