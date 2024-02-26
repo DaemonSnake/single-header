@@ -2,7 +2,7 @@
 name = "single-header"
 version = "0.2.1"
 edition = "2021"
-license-file = "LICENSE"
+license = "MIT"
 repository = "http://github.com/DaemonSnake/single-header"
 description = "a rust command line utility to generate portable C/C++ single header file"
 readme = "README.md"
