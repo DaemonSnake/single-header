@@ -86,7 +86,7 @@ Options:
           path to build folder to find the compile_commands.json file that contains how to compile <FILE>
 
   -i, --inline <INLINE_PATH>
-          path / file that must allways be `#include` expanded (can provided multiple times)
+          path / file that must allways be `#include` expanded (can be provided multiple times)
 
   -x, --lang <LANG>
           [default: c++]

@@ -47,7 +47,7 @@ struct Ops {
         long="inline",
         name="INLINE_PATH",
         action = ArgAction::Append,
-        help="path / file that must allways be `#include` expanded (can provided multiple times)"
+        help="path / file that must allways be `#include` expanded (can be provided multiple times)"
     )]
     inline_paths: Vec<String>,
 
