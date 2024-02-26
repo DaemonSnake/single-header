@@ -27,7 +27,7 @@ impl SearchPaths {
         let stderr_lines = stderr_command("C preprocessor", command)?;
         let mut parsing_search_list: bool = false;
 
-        let mut search_paths: Trie<_, _> = Trie::new();
+        let mut search_paths = Trie::new();
 
         for line in stderr_lines {
             if line.starts_with("#include <...> search starts here:") {
