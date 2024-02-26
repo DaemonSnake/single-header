@@ -84,7 +84,7 @@ fn base_args(required: Vec<&'static str>, lang: Lang) -> Vec<&'static str> {
 }
 
 fn main() -> Result<()> {
-    let ops = Ops::try_parse()?;
+    let ops = Ops::parse();
 
     if let Err(e) = which::which(ops.preprocessor.as_str()) {
         panic!(
