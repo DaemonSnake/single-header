@@ -7,7 +7,7 @@ mod process;
 mod system_paths;
 mod utils;
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use args::{Lang, Preprocessor, Protection};
 use clap::{ArgAction, Parser};
 use process::process_lines;
@@ -87,28 +87,22 @@ fn base_args(required: Vec<&'static str>, lang: Lang) -> Vec<&'static str> {
 fn main() -> Result<()> {
     let ops = Ops::parse();
 
-    if let Err(e) = which::which(ops.preprocessor.as_str()) {
-        panic!(
-            "Failed to find preprocessor `{}`: {}",
-            ops.preprocessor.as_str(),
-            e
-        );
-    };
+    let preprocessor = ops.preprocessor.as_str();
+
+    which::which(preprocessor)
+        .with_context(|| format!("Failed to find preprocessor `{preprocessor}` in PATH"))?;
 
     let base_preprocessor_args = base_args(ops.preprocessor.required_args(), ops.lang);
 
     let cmake_opts = cmake::cmake_options(ops.cmake, &ops.file)?;
     let extra_cpp_opts = utils::merge(cmake_opts, ops.cpp_opts);
 
-    let search_paths = system_paths::SearchPaths::new(
-        ops.preprocessor.as_str(),
-        &base_preprocessor_args,
-        &extra_cpp_opts,
-    )?;
+    let search_paths =
+        system_paths::SearchPaths::new(preprocessor, &base_preprocessor_args, &extra_cpp_opts)?;
 
     let inline_paths = inline_paths::InlinePaths::new(ops.inline_paths);
 
-    let mut command = Command::new(ops.preprocessor.as_str());
+    let mut command = Command::new(preprocessor);
 
     command
         .args(&base_preprocessor_args)
