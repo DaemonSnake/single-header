@@ -1,5 +1,5 @@
 use crate::utils::stderr_command;
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use radix_trie::{Trie, TrieCommon};
 use std::{
     path::{Path, PathBuf},
@@ -50,18 +50,20 @@ impl SearchPaths {
         Ok(SearchPaths { search_paths })
     }
 
-    pub fn cleanup_path(&self, absolute_path: &PathBuf) -> String {
+    pub fn cleanup_path(&self, absolute_path: &PathBuf) -> Result<String> {
         let Some(search_path_trie) = self.search_paths.get_ancestor(absolute_path) else {
-            panic!(
+            return Err(anyhow!(
                 "Path {} is not in search paths",
-                absolute_path.to_str().unwrap()
-            );
+                absolute_path.display()
+            ));
         };
-        absolute_path
-            .strip_prefix(search_path_trie.key().unwrap())
+        let prefix = search_path_trie.key().unwrap(); // unwrap is safe because we know the path is in the trie
+        let stripped_path = absolute_path
+            .strip_prefix(prefix)
             .expect("search path prefix was found but couldn't be stripped")
-            .to_str()
-            .expect("result path isn't valid unicode")
-            .to_string()
+            .display()
+            .to_string();
+
+        Ok(stripped_path)
     }
 }

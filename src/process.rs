@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::collections::VecDeque;
 use std::path::PathBuf;
 
@@ -61,16 +62,20 @@ impl Processor {
                 if include_info.state.ignorable() {
                     return None;
                 }
-                self.on_include_info(include_info)
+                self.try_undo_system_include(include_info)
             }
         }
     }
 
-    fn on_include_info(&mut self, include_info: IncludeDirective) -> Option<String> {
+    fn try_undo_system_include(&mut self, include_info: IncludeDirective) -> Option<String> {
         let state = include_info.state;
-        let path = include_info
-            .absolute_path
-            .expect("include file in cpp output doesn't exists");
+
+        let Some(path) = include_info.absolute_path else {
+            panic!(
+                "include file {} in cpp output doesn't exists",
+                include_info.filename
+            );
+        };
         let system_header = state.system_header && !self.inline_paths.should_inline(&path);
         match state.status {
             FlagStatus::Open => {
@@ -81,7 +86,10 @@ impl Processor {
                     matches!(self.include_queue.back(), Some(ShowContent(false)));
 
                 let ret = if system_header && !is_hidding_included_lines {
-                    Some(self.include_string(&path))
+                    let include = self
+                        .system_include_string(&path)
+                        .expect("Failed to create system include string from absolute path");
+                    Some(include)
                 } else {
                     None
                 };
@@ -101,8 +109,18 @@ impl Processor {
         None
     }
 
-    fn include_string(&self, filename: &PathBuf) -> String {
+    fn system_include_string(&self, filename: &PathBuf) -> Result<String> {
         let include_name = self.search_paths.cleanup_path(filename);
-        format!("#include <{include_name}>")
+
+        match include_name {
+            Err(err) => {
+                let ctx = format!("Failed to cleanup path: {}", filename.display());
+                Err(err.context(ctx))
+            }
+            Ok(include_name) => {
+                let include = format!("#include <{include_name}>");
+                Ok(include)
+            }
+        }
     }
 }
