@@ -16,6 +16,7 @@ This Rust program is designed to convert C/C++ files into portable single-header
 Limitations:
 - all preprocessor conditions (`#if`/`#else`/`#endif`) that occurs outside system headers will be evaluated.
   Only way to prevent this would be to implement a custom mock C-preprocessor.
+- if the input file contains non-inlined definitions the header will not be safe to include in multiple translation units. https://github.com/DaemonSnake/single-header/issues/5
 
 ### Example
 
