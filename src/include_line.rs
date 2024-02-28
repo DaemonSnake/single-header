@@ -55,12 +55,12 @@ fn make_include_output_regex() -> Regex {
     let filename_regex = r#""([^"]*)""#;
 
     let re = format!(r"{hash_start}{sep}{line_regex}{sep}{filename_regex}");
-    return Regex::new(re.as_str()).unwrap();
+    Regex::new(re.as_str()).unwrap()
 }
 
 fn make_flags_regex() -> Regex {
     let flag_regex = r"\s*(\d+)";
-    return Regex::new(flag_regex).unwrap();
+    Regex::new(flag_regex).unwrap()
 }
 
 lazy_static! {
@@ -68,12 +68,14 @@ lazy_static! {
     static ref FLAGS_REGEX: Regex = make_flags_regex();
 }
 
+const BAD_NUMBER_PARSE: &str = "parsed as number by regex but not a number";
+
 pub fn try_parse(line: &str) -> Option<IncludeDirective> {
     let Some(captures) = INCLUDE_OUTPUT_REGEX.captures(line) else {
         return None;
     };
     let (full, [linenum, filename]) = captures.extract();
-    let linenum = linenum.parse::<u32>().unwrap();
+    let linenum = linenum.parse::<u32>().expect(BAD_NUMBER_PARSE);
     let end = full.len();
     let flags_substr = &line[end..];
 
@@ -81,7 +83,7 @@ pub fn try_parse(line: &str) -> Option<IncludeDirective> {
 
     FLAGS_REGEX.captures_iter(flags_substr).for_each(|c| {
         let (_, [flag_str]) = c.extract();
-        let flag_number = flag_str.parse::<u32>().unwrap();
+        let flag_number = flag_str.parse::<u32>().expect(BAD_NUMBER_PARSE);
 
         match flag_number {
             flag if flag == FlagStatus::Open as u32 => {
