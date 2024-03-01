@@ -28,11 +28,24 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
 
+    # Auto publish on Cargo.toml change
+
+      # Use dorny/paths-filter to check for modified files
+    - id: path_filter
+      uses: dorny/paths-filter@v2
+      with:
+        filters: |
+          cargo_changed:
+            - 'Cargo.toml'
+
     - uses: actions-rs/toolchain@v1
       with:
           toolchain: stable
           override: true
+      if: steps.path_filter.outputs.cargo_changed == 'true'
+    
     - uses: katyo/publish-crates@v2
       with:
           ignore-unpublished-changes: true
           registry-token: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      if: steps.path_filter.outputs.cargo_changed == 'true'
